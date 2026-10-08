@@ -10,6 +10,7 @@ function Toaster({ ...props }: ToasterProps): React.JSX.Element {
       theme="system"
       duration={2500}
       visibleToasts={1}
+      closeButton
       toastOptions={{
         classNames: {
           toast: 'group toast shadow-lg',

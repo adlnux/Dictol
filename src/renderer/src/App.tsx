@@ -6,7 +6,6 @@ import { toast } from 'sonner'
 import { useQueryHistoryChangeListener } from '@/hooks/use-query-history'
 import { router } from '@/routes/router'
 import { AppErrorBoundary } from './components/AppErrorBoundary'
-import { Toaster } from './components/ui/sonner'
 
 // Queries and mutations call local IPC APIs and must remain available offline.
 const queryClient = new QueryClient({
@@ -40,7 +39,6 @@ function App(): React.JSX.Element {
   return (
     <AppErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <Toaster position="top-center" />
         <AppContent />
       </QueryClientProvider>
     </AppErrorBoundary>

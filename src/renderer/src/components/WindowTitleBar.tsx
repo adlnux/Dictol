@@ -4,6 +4,7 @@ import { AppWindow, ArrowLeft, ArrowRight, PanelsTopLeft, Columns2, Rows2 } from
 
 import { CompactTitleBarSearch } from '@/components/CompactTitleBarSearch'
 import { Button } from '@/components/ui/button'
+import { Toaster } from '@/components/ui/sonner'
 import { selectCompactMode, useAppStore } from '@/stores/app-store'
 import {
   MAIN_WINDOW_TITLEBAR_CONTROL_HEIGHT,
@@ -46,6 +47,7 @@ export function WindowTitleBar(): React.JSX.Element {
       className="app-chrome-surface drag-region flex shrink-0 items-center border-border"
       style={{ height: MAIN_WINDOW_TITLEBAR_HEIGHT }}
     >
+      <Toaster position="top-center" />
       <div
         className={`window-titlebar-content flex h-full min-w-0 items-center gap-2 px-3.5 ${
           window.dictol.platform === 'darwin' ? 'pl-24' : ''

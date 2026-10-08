@@ -153,6 +153,19 @@ body [data-sonner-toaster].toaster {
   --normal-border-hover: var(--border-strong);
 }
 
+/*
+ * The toaster renders over the title bar drag region (`-webkit-app-region: drag`),
+ * which swallows mouse events — the close button would drag the window instead of
+ * dismissing the toast. The toaster <ol> has zero height (toasts are absolutely
+ * positioned), so `no-drag` must be applied to the toast items themselves.
+ */
+body [data-sonner-toaster].toaster,
+body [data-sonner-toaster].toaster [data-sonner-toast],
+body [data-sonner-toaster].toaster [data-sonner-toast] * {
+  app-region: no-drag;
+  -webkit-app-region: no-drag;
+}
+
 @layer base {
   * {
     border-color: var(--border);
@@ -184,10 +197,12 @@ body [data-sonner-toaster].toaster {
 }
 
 .drag-region {
+  app-region: drag;
   -webkit-app-region: drag;
 }
 
 .no-drag {
+  app-region: no-drag;
   -webkit-app-region: no-drag;
 }
 
