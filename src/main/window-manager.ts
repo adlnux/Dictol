@@ -83,6 +83,19 @@ export class WindowManager {
       }
     })
 
+    mainWindow.webContents.on('context-menu', (_event, params) => {
+      if (!params.isEditable && !params.selectionText.trim()) return
+      const menu = Menu.buildFromTemplate(
+        params.isEditable
+          ? [{ role: 'cut' }, { role: 'copy' }, { role: 'paste' }]
+          : [{ role: 'copy' }]
+      )
+      menu.popup({
+        window: mainWindow,
+        ...(params.frame ? { frame: params.frame } : {})
+      })
+    })
+
     if (!this.observingNativeAppearance) {
       nativeTheme.on('updated', this.updateNativeAppearance)
       this.observingNativeAppearance = true
