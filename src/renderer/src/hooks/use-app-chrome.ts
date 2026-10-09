@@ -7,24 +7,6 @@ export function useAppChrome(): void {
 
   useLayoutEffect(() => {
     document.documentElement.dataset.chromeTone = chromeTone
-    const updateWindowActivity = (): void => {
-      document.documentElement.dataset.windowActive = String(document.hasFocus())
-    }
-
-    updateWindowActivity()
-    window.addEventListener('focus', updateWindowActivity)
-    window.addEventListener('blur', updateWindowActivity)
-
-    if (window.dictol?.platform === 'darwin') {
-      document.documentElement.dataset.chromeVibrancy = 'on'
-    } else {
-      delete document.documentElement.dataset.chromeVibrancy
-    }
-
-    return () => {
-      window.removeEventListener('focus', updateWindowActivity)
-      window.removeEventListener('blur', updateWindowActivity)
-    }
   }, [chromeTone])
 
   useEffect(() => {

@@ -368,6 +368,7 @@ declare global {
       }
       app: {
         getVersion: () => Promise<string | null>
+        isMainWindowFocused: () => Promise<boolean>
         getAggregateLayout: () => Promise<'vertical' | 'horizontal' | null>
         saveAggregateLayout: (
           layout: 'vertical' | 'horizontal'
@@ -388,6 +389,7 @@ declare global {
         updateTouchBarState: (state: TouchBarState) => void
         onSearchRequest: (callback: (request: MainWindowSearchRequest) => void) => () => void
         onFocusSearch: (callback: () => void) => () => void
+        onMainWindowFocusChanged: (callback: (isFocused: boolean) => void) => () => void
         onShowFindBar: (callback: () => void) => () => void
         onTouchBarToggleStar: (callback: () => void) => () => void
         onTouchBarSelectDictionary: (callback: (dictionaryId: string) => void) => () => void

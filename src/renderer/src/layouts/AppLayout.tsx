@@ -7,6 +7,7 @@ import { Sidebar } from '@/components/Sidebar'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useWindowWidthThreshold } from '@/hooks/use-window-width-threshold'
 import { useAppChrome } from '@/hooks/use-app-chrome'
+import { useMainWindowChrome } from '@/hooks/use-main-window-chrome'
 import { useAppStore } from '@/stores/app-store'
 
 export function AppLayout(): React.JSX.Element {
@@ -17,6 +18,7 @@ export function AppLayout(): React.JSX.Element {
 
   useWindowWidthThreshold()
   useAppChrome()
+  useMainWindowChrome()
 
   useEffect(() => {
     let active = true

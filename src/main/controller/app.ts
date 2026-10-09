@@ -29,6 +29,7 @@ export class AppController extends BaseController {
   override mount(): void {
     // Keep app metadata behind the same sender boundary as the other renderer APIs.
     ipcMain.handle('app:get-version', this.getVersion)
+    ipcMain.handle('app:is-main-window-focused', this.isMainWindowFocused)
     ipcMain.handle('app:get-aggregate-layout', (event) => {
       if (!this.acceptsSender(event.sender)) return null
       return this.runtime.appConfig.load().aggregateLayout
@@ -62,6 +63,11 @@ export class AppController extends BaseController {
   getVersion = (event: IpcMainInvokeEvent): string | null => {
     if (!this.acceptsSender(event.sender)) return null
     return app.getVersion()
+  }
+
+  isMainWindowFocused = (event: IpcMainInvokeEvent): boolean => {
+    if (!this.acceptsSender(event.sender)) return false
+    return this.runtime.mainWindow?.isFocused() ?? false
   }
 
   getDictionaryLayout = (event: IpcMainInvokeEvent): DictionaryLayout | null => {

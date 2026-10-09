@@ -347,6 +347,7 @@ const api = Object.freeze({
   }),
   app: Object.freeze({
     getVersion: (): Promise<string | null> => ipcRenderer.invoke('app:get-version'),
+    isMainWindowFocused: (): Promise<boolean> => ipcRenderer.invoke('app:is-main-window-focused'),
     getAggregateLayout: (): Promise<'vertical' | 'horizontal' | null> =>
       ipcRenderer.invoke('app:get-aggregate-layout'),
     saveAggregateLayout: (
@@ -388,6 +389,12 @@ const api = Object.freeze({
       const listener = (): void => callback()
       ipcRenderer.on('app:focus-search', listener)
       return () => ipcRenderer.removeListener('app:focus-search', listener)
+    },
+    onMainWindowFocusChanged: (callback: (isFocused: boolean) => void): (() => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, isFocused: boolean): void =>
+        callback(isFocused)
+      ipcRenderer.on('app:main-window-focus-changed', listener)
+      return () => ipcRenderer.removeListener('app:main-window-focus-changed', listener)
     },
     onShowFindBar: (callback: () => void): (() => void) => {
       const listener = (): void => callback()

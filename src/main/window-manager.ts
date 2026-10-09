@@ -83,6 +83,13 @@ export class WindowManager {
       }
     })
 
+    const notifyWindowFocusChanged = (isFocused: boolean): void => {
+      if (mainWindow.webContents.isDestroyed()) return
+      mainWindow.webContents.send('app:main-window-focus-changed', isFocused)
+    }
+    mainWindow.on('focus', () => notifyWindowFocusChanged(true))
+    mainWindow.on('blur', () => notifyWindowFocusChanged(false))
+
     mainWindow.webContents.on('context-menu', (_event, params) => {
       if (!params.isEditable && !params.selectionText.trim()) return
       const menu = Menu.buildFromTemplate(
