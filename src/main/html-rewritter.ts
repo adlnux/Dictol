@@ -21,7 +21,7 @@ export function rewriteEntryHref(href: string, dictionaryId: number): string {
   if (!/^entry:\/\//i.test(href)) return href
   const word = href.replace(/^entry:\/\/\/?/i, '')
   if (!word) return href
-  return `entry://dictionary-${dictionaryId}/${encodeURIComponent(word)}`
+  return `entry://dictionary-${dictionaryId}/${word}`
 }
 
 export function addLazyLoadingToImage(element: DefaultTreeAdapterTypes.Element): void {
