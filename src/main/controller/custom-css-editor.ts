@@ -261,6 +261,14 @@ export class CustomCssEditorController extends BaseController {
         console.error('Failed to restore custom CSS preview theme', { error })
       })
     })
+    view.webContents.on('devtools-opened', () => {
+      if (view.isDestroyed || !view.getURL()) return
+      void this.applyPreviewTheme(view, this.previewTheme).catch((error: unknown) => {
+        console.error('Failed to restore custom CSS preview theme after opening DevTools', {
+          error
+        })
+      })
+    })
   }
 
   private setPreviewReady(ready: boolean): void {
@@ -315,6 +323,25 @@ export class CustomCssEditorController extends BaseController {
     }
   }
 
+  /** Updates the inspected dictionary preview's color scheme via devtools if devtools is opened. */
+  private async setPreviewThemeViaDevTools(theme: CustomCssEditorTheme): Promise<void> {
+    const contents =
+      this.runtime.windowManager.customCssEditorPreviewView?.webContents.devToolsWebContents
+    if (!contents || contents.isDestroyed()) return
+    await contents
+      .executeJavaScript(
+        `
+      import('./core/common/common.js').then(({ Settings }) => {
+        const settings = Settings.Settings.instance();
+        settings.moduleSetting('emulated-css-media-feature-prefers-color-scheme').set(${JSON.stringify(theme)});
+      })
+    `
+      )
+      .catch((error: unknown) => {
+        console.error('Failed to set custom CSS DevTools theme', { error })
+      })
+  }
+
   private async replacePreviewCss(
     preview: NonNullable<typeof this.runtime.windowManager.customCssEditorPreviewView>
   ): Promise<void> {
@@ -343,8 +370,12 @@ export class CustomCssEditorController extends BaseController {
   ): Promise<void> {
     preview.setBackgroundColor(theme === 'dark' ? '#232323' : '#ffffff')
     const task = this.previewThemeTask.then(async () => {
-      // DevTools owns media emulation while open. Restore the preview theme after it closes.
-      if (preview.webContents.isDevToolsOpened()) return
+      // DevTools owns media emulation while open and reapplies its own settings.
+      // Use that owner instead of competing with another debugger connection.
+      if (preview.webContents.isDevToolsOpened()) {
+        await this.setPreviewThemeViaDevTools(theme)
+        return
+      }
       const devtools = preview.webContents.debugger
       if (!devtools.isAttached()) devtools.attach('1.3')
       await devtools.sendCommand('Emulation.setEmulatedMedia', {
