@@ -3,10 +3,12 @@
 WITH `presets` (`name`, `favicon_url`, `url_template`, `preset_order`) AS (
 	VALUES
 		('汉典', 'https://zdic.net/favicon.ico', 'https://zdic.net/hans/%s', 0),
-		('Vocabulary', 'https://www.vocabulary.com/favicon.ico', 'https://www.vocabulary.com/dictionary/%s', 1),
-		('Google 翻译', 'https://translate.google.com/favicon.ico', 'https://translate.google.com/?hl=zh-cn&sl=auto&tl=zh-CN&text=%s&op=translate', 2),
-		('有道词典', 'https://shared-https.ydstatic.com/images/favicon.ico', 'https://www.youdao.com/result?word=%s&lang=en', 3),
-		('Wikipedia', 'https://en.wikipedia.org/favicon.ico', 'https://en.wikipedia.org/wiki/%s', 4)
+		('汉语国学', 'https://static.hanyuguoxue.com/assets/favicons/favicon.ico', 'https://www.hanyuguoxue.com/zidian/search?words=%s&type=all', 1),
+		('有道词典', 'https://shared-https.ydstatic.com/images/favicon.ico', 'https://www.youdao.com/result?word=%s&lang=en', 2),
+		('Oxford Learners Dictionaries', 'https://www.oxfordlearnersdictionaries.com/external/images/favicon.ico?version=2.3.81', 'https://www.oxfordlearnersdictionaries.com/definition/english/%s', 3),
+		('Vocabulary', 'https://www.vocabulary.com/favicon.ico', 'https://www.vocabulary.com/dictionary/%s', 4),
+		('Google 翻译', 'https://translate.google.com/favicon.ico', 'https://translate.google.com/?hl=zh-cn&sl=auto&tl=zh-CN&text=%s&op=translate', 5),
+		('Wikipedia', 'https://en.wikipedia.org/favicon.ico', 'https://en.wikipedia.org/wiki/%s', 6)
 )
 INSERT INTO `online_dictionary` (`name`, `favicon_url`, `url_template`, `sort_order`)
 SELECT
