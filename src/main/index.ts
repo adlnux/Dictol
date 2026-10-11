@@ -158,7 +158,7 @@ function configureMainWindow(
     return { action: 'deny' }
   })
 
-  const loadPromise = mainWindow.loadURL(resolveRendererUrl('index.html'))
+  const loadPromise = mainWindow.loadURL(`${resolveRendererUrl('index.html')}#/search`)
   showMainWindow()
   void loadPromise.then(showMainWindow).catch((error: unknown) => {
     console.error('Failed to load renderer', error)
