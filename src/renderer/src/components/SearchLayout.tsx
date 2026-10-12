@@ -11,7 +11,7 @@ import {
 } from '@/stores/app-store'
 import { SearchPanel } from '@/components/SearchPanel'
 import { RightSidebar } from '@/components/RightSidebar'
-import { useRightSidebarSearchFollow } from '@/components/useRightSidebarSearchFollow'
+import { useRightSidebarSearchFollow } from '@/hooks/useRightSidebarSearchFollow'
 
 const getRightSidebarPanelSize = (size: number | string | undefined): string =>
   size === undefined ? RIGHT_SIDEBAR_DEFAULT_SIZE : typeof size === 'number' ? `${size}%` : size
