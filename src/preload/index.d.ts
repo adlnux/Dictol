@@ -586,6 +586,7 @@ declare global {
       }
       embedBrowser: {
         load: (tabId: string, url: string, navigationVersion: number) => Promise<void>
+        navigateHistory: (request: EmbedBrowserHistoryNavigationRequest) => void
         activate: (
           tabId: string | null,
           bounds?: { x: number; y: number; width: number; height: number }
@@ -595,7 +596,12 @@ declare global {
           bounds: { x: number; y: number; width: number; height: number }
         ) => void
         close: (tabId: string) => Promise<boolean>
-        onUrlChanged: (callback: (tabId: string, url: string) => void) => () => void
+        onNavigationChanged: (
+          callback: (
+            tabId: string,
+            navigation: { url: string; canGoBack: boolean; canGoForward: boolean }
+          ) => void
+        ) => () => void
         onLoadingChanged: (callback: (tabId: string, isLoading: boolean) => void) => () => void
       }
     }
