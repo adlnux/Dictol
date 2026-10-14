@@ -9,7 +9,7 @@ jobs:
     env:
       ELECTRON_BUILDER_CACHE: C:\TEMP\electron-builder-cache
       CARGO_TARGET_DIR: ./crates/target
-      CARGO_PROFILE_RELEASE_DEBUG: false # 关闭调试符号，加速Rust编译，减小包体积
+      CARGO_PROFILE_RELEASE_DEBUG: false
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -27,7 +27,6 @@ jobs:
           node-version: 22.15.1
           cache: 'npm'
 
-      # Rust编译产物缓存
       - name: Cache Rust build artifacts
         id: rustcache
         uses: Swatinem/rust-cache@v2
@@ -37,7 +36,6 @@ jobs:
             crates
           key: "dictol-rust-windows"
 
-      # 打印Rust缓存状态
       - name: Show Rust cache status
         run: |
           Write-Host "Cache hit? ${{ steps.rustcache.outputs.cache-hit }}"
@@ -47,7 +45,6 @@ jobs:
             Write-Host "❌ Rust缓存未命中，本次完整编译Rust原生模块"
           }
 
-      # electron-builder缓存：缓存Electron本体、binaries
       - name: Cache Electron Builder binaries
         id: electron-builder-cache
         uses: actions/cache@v4
@@ -64,7 +61,7 @@ jobs:
             Write-Host "❌ Electron缓存未命中，本次下载Electron二进制包"
           }
 
-      - name: Install dependencies & build native Rust module
+      - name: Install dependencies
         run: npm install --no-deprecation
 
       - name: Prepare electron-builder temp cache dir
@@ -76,19 +73,41 @@ jobs:
           if(Test-Path release) { Remove-Item release -Recurse -Force }
           if(Test-Path build.log) { Remove-Item build.log }
 
-      # =========关键改动=========
-      # 调用项目总构建脚本npm run build：编译Rust + 打包前端，生成完整资源与mdict-native的.node原生模块
-      # 不再调用build-win.mjs，避开里面adblock restore捕获逻辑
+      # 开启PowerShell全局日志录制（替代 *>>，稳定捕获所有输出）
       - name: Run full project build (frontend + rust native module)
-        run: npm run build *>> build.log
+        run: |
+          Start-Transcript -Path build.log
+          npm run build
+          Stop-Transcript
+        shell: pwsh
+        continue-on-error: true
+
+      # 诊断：打印构建后的目录，查看.node原生模块是否生成
+      - name: Diagnose - list native module files
+        run: |
+          Write-Host "===== Check crates target dir ====="
+          if(Test-Path ./crates/target/release){
+            Get-ChildItem ./crates/target/release/*.node
+          }else{
+            Write-Host "./crates/target/release not found"
+          }
+          Write-Host "===== Check node_modules @dictol ====="
+          if(Test-Path ./node_modules/@dictol){
+            Get-ChildItem ./node_modules/@dictol -Recurse *.node
+          }else{
+            Write-Host "./node_modules/@dictol not found"
+          }
         shell: pwsh
 
-      # 直接调用electron-builder打包portable便携exe
+      # 如果构建成功，才执行electron-builder打包
       - name: Build portable exe directly with electron-builder
-        run: npx electron-builder --win portable *>> build.log
+        run: |
+          Start-Transcript -Append -Path build.log
+          npx electron-builder --win portable
+          Stop-Transcript
         shell: pwsh
+        continue-on-error: true
 
-      # 打印打包出来exe的文件大小
       - name: Print portable exe size
         run: |
           if(Test-Path release){
@@ -103,7 +122,6 @@ jobs:
           }
         shell: pwsh
 
-      # 无论成功失败，上传产物+日志
       - name: Upload Artifact (exe + build log)
         uses: actions/upload-artifact@v4
         if: always()
