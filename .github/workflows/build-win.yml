@@ -72,19 +72,12 @@ jobs:
           if(Test-Path dist) { Remove-Item dist -Recurse -Force }
           if(Test-Path release) { Remove-Item release -Recurse -Force }
 
-      # 1.编译Rust原生模块（必须执行）
       - name: Step1 Build Rust native module (npm run native:build)
         run: npm run native:build
 
-      # 跳过 typecheck！CI不做TS静态类型检查
-      # - name: Step2 TypeScript typecheck
-      #   run: npm run typecheck
-
-      # 2.直接执行electron‑vite前端构建
       - name: Step3 electron‑vite frontend build
         run: npx electron-vite build
 
-      # 诊断：检查 .node 原生模块是否生成
       - name: Diagnose - list native module files
         run: |
           Write-Host "===== Check crates target dir ====="
@@ -101,11 +94,9 @@ jobs:
           }
         shell: pwsh
 
-      # 打包portable便携exe，输出到dist目录
       - name: Build portable exe directly with electron‑builder
         run: npx electron-builder --win portable
 
-      # ⚠️ 修改：产物在dist，不再是release
       - name: Print portable exe size
         run: |
           if(Test-Path dist){
@@ -120,7 +111,6 @@ jobs:
           }
         shell: pwsh
 
-      # ⚠️ 修改上传路径为 dist/*.exe
       - name: Upload Artifact exe
         uses: actions/upload-artifact@v4
         if: success() || failure()
