@@ -71,18 +71,18 @@ jobs:
         run: |
           if(Test-Path dist) { Remove-Item dist -Recurse -Force }
           if(Test-Path release) { Remove-Item release -Recurse -Force }
-          if(Test-Path build.log) { Remove-Item build.log }
 
-      # 开启PowerShell全局日志录制（替代 *>>，稳定捕获所有输出）
-      - name: Run full project build (frontend + rust native module)
-        run: |
-          Start-Transcript -Path build.log
-          npm run build
-          Stop-Transcript
-        shell: pwsh
-        continue-on-error: true
+      # ==========拆分原 npm run build 三步，独立Step，网页直接看报错==========
+      - name: Step1 Build Rust native module (npm run native:build)
+        run: npm run native:build
 
-      # 诊断：打印构建后的目录，查看.node原生模块是否生成
+      - name: Step2 TypeScript typecheck
+        run: npm run typecheck
+
+      - name: Step3 electron‑vite frontend build
+        run: npx electron-vite build
+
+      # 诊断：检查 .node 原生模块是否生成
       - name: Diagnose - list native module files
         run: |
           Write-Host "===== Check crates target dir ====="
@@ -91,7 +91,7 @@ jobs:
           }else{
             Write-Host "./crates/target/release not found"
           }
-          Write-Host "===== Check node_modules @dictol ====="
+          Write-Host "===== Check node_modules/@dictol ====="
           if(Test-Path ./node_modules/@dictol){
             Get-ChildItem ./node_modules/@dictol -Recurse *.node
           }else{
@@ -99,14 +99,8 @@ jobs:
           }
         shell: pwsh
 
-      # 如果构建成功，才执行electron-builder打包
-      - name: Build portable exe directly with electron-builder
-        run: |
-          Start-Transcript -Append -Path build.log
-          npx electron-builder --win portable
-          Stop-Transcript
-        shell: pwsh
-        continue-on-error: true
+      - name: Build portable exe directly with electron‑builder
+        run: npx electron-builder --win portable
 
       - name: Print portable exe size
         run: |
@@ -122,11 +116,9 @@ jobs:
           }
         shell: pwsh
 
-      - name: Upload Artifact (exe + build log)
+      - name: Upload Artifact exe
         uses: actions/upload-artifact@v4
-        if: always()
+        if: success() || failure()
         with:
           name: Dictol-Win-Portable-x64
-          path: |
-            release/*.exe
-            build.log
+          path: release/*.exe
