@@ -1,11 +1,13 @@
-name: Build Dictol Windows
-run-name: Build Dictol Windows x64
+name: Build Dictol Windows Portable
+run-name: Build Dictol Windows Portable x64
 on:
-  workflow_dispatch: # ✅ 支持手动点击触发，不用提交代码
+  workflow_dispatch: # 手动触发
 
 jobs:
-  build-windows:
-    runs-on: windows-2022 # Windows2022自带VS Build Tools，完美编译Rust/NAPI/better-sqlite3
+  build-windows-portable:
+    runs-on: windows-2022
+    env:
+      ELECTRON_BUILDER_CACHE: C:\TEMP\electron-builder-cache
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -23,14 +25,23 @@ jobs:
           node-version: 22.15.1
           cache: 'npm'
 
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          cache-on-failure: true
+
       - name: Install dependencies & build native Rust module
-        run: npm install
+        run: npm install --no-deprecation
 
-      - name: Build Windows installer
-        run: npm run build:win
+      - name: Prepare electron-builder temp cache dir
+        run: New-Item -ItemType Directory -Force -Path $env:ELECTRON_BUILDER_CACHE
 
-      - name: Upload artifact（打包产物）
+      # 核心：直接调用electron-builder，仅打包win便携版，跳过NSIS安装包
+      - name: Build Windows Portable exe
+        run: npx electron-builder --win portable
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dictol-Win-x64
+          name: Dictol-Win-Portable-x64
           path: release/*.exe
