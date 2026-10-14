@@ -1,0 +1,36 @@
+name: Build Dictol Windows
+run-name: Build Dictol Windows x64
+on:
+  workflow_dispatch: # ✅ 支持手动点击触发，不用提交代码
+
+jobs:
+  build-windows:
+    runs-on: windows-2022 # Windows2022自带VS Build Tools，完美编译Rust/NAPI/better-sqlite3
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: default
+          toolchain: stable
+          override: true
+
+      - name: Setup Node 22.15.1
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.15.1
+          cache: 'npm'
+
+      - name: Install dependencies & build native Rust module
+        run: npm install
+
+      - name: Build Windows installer
+        run: npm run build:win
+
+      - name: Upload artifact（打包产物）
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dictol-Win-x64
+          path: release/*.exe
