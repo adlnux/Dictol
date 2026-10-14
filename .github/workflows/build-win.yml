@@ -76,7 +76,7 @@ jobs:
       - name: Step1 Build Rust native module (npm run native:build)
         run: npm run native:build
 
-      # 跳过 typecheck！CI不做TS静态类型检查，避免类型报错阻断打包
+      # 跳过 typecheck！CI不做TS静态类型检查
       # - name: Step2 TypeScript typecheck
       #   run: npm run typecheck
 
@@ -101,27 +101,29 @@ jobs:
           }
         shell: pwsh
 
-      # 打包portable便携exe
+      # 打包portable便携exe，输出到dist目录
       - name: Build portable exe directly with electron‑builder
         run: npx electron-builder --win portable
 
+      # ⚠️ 修改：产物在dist，不再是release
       - name: Print portable exe size
         run: |
-          if(Test-Path release){
-            $exeFiles = Get-ChildItem release/*.exe
+          if(Test-Path dist){
+            $exeFiles = Get-ChildItem dist/*.exe
             foreach ($f in $exeFiles) {
               $sizeMB = [math]::Round($f.Length / 1MB, 2)
               Write-Host "📦 产物文件: $($f.Name)"
               Write-Host "📦 文件大小: $sizeMB MB ($($f.Length) Bytes)"
             }
           }else{
-            Write-Host "⚠️ release目录不存在，打包失败"
+            Write-Host "⚠️ dist目录不存在，打包失败"
           }
         shell: pwsh
 
+      # ⚠️ 修改上传路径为 dist/*.exe
       - name: Upload Artifact exe
         uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
           name: Dictol-Win-Portable-x64
-          path: release/*.exe
+          path: dist/*.exe
