@@ -1,7 +1,7 @@
 name: Build Dictol Windows Portable
 run-name: Build Dictol Windows Portable x64
 on:
-  workflow_dispatch: # 手动触发
+  workflow_dispatch:
 
 jobs:
   build-windows-portable:
@@ -36,9 +36,15 @@ jobs:
       - name: Prepare electron-builder temp cache dir
         run: New-Item -ItemType Directory -Force -Path $env:ELECTRON_BUILDER_CACHE
 
-      # 核心：直接调用electron-builder，仅打包win便携版，跳过NSIS安装包
-      - name: Build Windows Portable exe
-        run: npx electron-builder --win portable
+      # CI临时修改package.json，给build-win附加portable参数，不提交回仓库
+      - name: Patch package.json force portable
+        run: |
+          $json = Get-Content package.json -Raw | ConvertFrom-Json
+          $json.scripts."build:win" = "node scripts/build-win.mjs -- --win portable"
+          $json | ConvertTo-Json -Depth 10 | Set-Content package.json
+
+      - name: Build Windows portable（使用项目自带脚本）
+        run: npm run build:win
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
